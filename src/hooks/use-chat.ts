@@ -72,7 +72,18 @@ export const useChat = (): UseChatReturn => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to get error message from response
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorText = await response.text();
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.message || errorJson.error) {
+            errorMessage = errorJson.message || errorJson.error;
+          }
+        } catch {
+          // If response is not JSON, use status code
+        }
+        throw new Error(errorMessage);
       }
 
       const responseText = await response.text();
@@ -227,10 +238,30 @@ export const useChat = (): UseChatReturn => {
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
+
+      // Provide more specific error messages
+      let errorContent = "Sorry, I encountered an error. Please try again.";
+
+      if (error instanceof Error) {
+        if (error.message.includes("500")) {
+          errorContent =
+            "I'm having trouble processing your request right now. This might be a policy-related query that needs additional configuration. Please try again in a moment or rephrase your question.";
+        } else if (error.message.includes("404")) {
+          errorContent =
+            "The service is temporarily unavailable. Please try again later.";
+        } else if (
+          error.message.includes("network") ||
+          error.message.includes("fetch")
+        ) {
+          errorContent =
+            "Network error. Please check your connection and try again.";
+        }
+      }
+
       // Add error message
       const errorMessage: ChatMessage = {
         role: "bot",
-        content: "Sorry, I encountered an error. Please try again.",
+        content: errorContent,
         id: generateUUID(),
         type: "text",
       };
