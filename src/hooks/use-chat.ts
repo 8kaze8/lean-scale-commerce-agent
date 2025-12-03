@@ -159,6 +159,7 @@ export const useChat = (): UseChatReturn => {
               messageType = "product-list";
             } else if (
               typeStr === "order status" ||
+              typeStr === "order_status" ||
               typeStr.includes("order")
             ) {
               messageType = "order-status";
