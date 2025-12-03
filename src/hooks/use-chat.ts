@@ -35,7 +35,12 @@ function generateUUID(): string {
 export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const sessionIdRef = useRef<string>(`LSC-${generateUUID()}`);
+  const sessionIdRef = useRef<string | null>(null);
+
+  // Initialize sessionId only on client side
+  if (typeof window !== "undefined" && !sessionIdRef.current) {
+    sessionIdRef.current = `LSC-${generateUUID()}`;
+  }
 
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) {
@@ -70,7 +75,24 @@ export const useChat = (): UseChatReturn => {
       }
 
       const responseText = await response.text();
-      const cleanResponse = responseText.trim();
+      let cleanResponse = responseText.trim();
+
+      // Try to parse JSON response
+      try {
+        const jsonResponse = JSON.parse(cleanResponse);
+        // If response has 'output' field, use it
+        if (jsonResponse.output) {
+          cleanResponse = jsonResponse.output;
+        } else if (typeof jsonResponse === "string") {
+          cleanResponse = jsonResponse;
+        } else {
+          // If it's an object but no 'output' field, stringify it
+          cleanResponse = JSON.stringify(jsonResponse, null, 2);
+        }
+      } catch {
+        // If not JSON, use the text as is
+        cleanResponse = responseText.trim();
+      }
 
       // Add bot response
       const botMessage: ChatMessage = {
@@ -100,6 +122,6 @@ export const useChat = (): UseChatReturn => {
     messages,
     isLoading,
     sendMessage,
-    sessionId: sessionIdRef.current,
+    sessionId: sessionIdRef.current || "",
   };
 };
