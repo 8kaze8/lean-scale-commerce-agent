@@ -6,7 +6,8 @@ import { Bot, User } from "lucide-react";
 import { ChatInput } from "./chat-input";
 import { useChat } from "@/src/hooks/use-chat";
 import { ChatMessage } from "@/src/hooks/use-chat";
-import { UIMapper } from "@/src/components/ui-mapper";
+import { BotMessage } from "@/src/components/bot-message";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const MessageBubble = ({ message }: { message: ChatMessage }) => {
@@ -27,7 +28,10 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
         </Avatar>
       )}
       {isUser ? (
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className={cn(
             "max-w-[85%] rounded-2xl px-4 py-2.5 bg-primary text-primary-foreground shadow-sm"
           )}
@@ -35,11 +39,9 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
             {message.content}
           </p>
-        </div>
+        </motion.div>
       ) : (
-        <div className={cn("w-full max-w-full min-w-0")}>
-          <UIMapper message={message} />
-        </div>
+        <BotMessage message={message} />
       )}
       {isUser && (
         <Avatar className="size-8 shrink-0 mt-1">
@@ -81,16 +83,31 @@ export const ChatLayout = () => {
             ))
           )}
           {isLoading && (
-            <div className="flex gap-3 px-4 py-3 justify-start">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex gap-3 px-4 py-3 justify-start"
+            >
               <Avatar className="size-8 shrink-0 mt-1">
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   <Bot className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted text-muted-foreground rounded-2xl px-4 py-2.5 shadow-sm">
+              <motion.div
+                className="bg-muted text-muted-foreground rounded-2xl px-4 py-2.5 shadow-sm"
+                animate={{
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
                 <p className="text-sm">Thinking...</p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )}
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { ProductCard } from "./product-card";
 import { OrderBox } from "./order-box";
 import { ChatMessage } from "@/src/hooks/use-chat";
+import { useTextReveal } from "@/src/hooks/use-text-reveal";
 
 interface UIMapperProps {
   message: ChatMessage & {
@@ -24,6 +25,16 @@ export const UIMapper = ({ message }: UIMapperProps) => {
   // Normalize type for comparison
   const normalizedType = message.type?.toLowerCase() || "";
 
+  // Use text reveal for AI message text (word chunks, not character-by-character)
+  // Always call hook at top level to follow React rules
+  const shouldAnimateText = !!message.content && message.content.trim().length > 0;
+  const { displayedText } = useTextReveal({
+    text: message.content || "",
+    chunkSize: 5, // Show 5 words at a time (faster)
+    delay: 30, // 30ms between chunks (very fast, like Gemini)
+    enabled: shouldAnimateText,
+  });
+
   // Check if it's a product list type (handle various formats from n8n)
   if (
     normalizedType === "product-list" ||
@@ -32,11 +43,11 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     normalizedType.includes("product")
   ) {
     if (!products || !Array.isArray(products) || products.length === 0) {
-      // Fallback to text if data is invalid
+      // Fallback to text if data is invalid - with text reveal
       return (
         <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm">
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
-            {message.content}
+            {displayedText}
           </p>
         </div>
       );
@@ -44,11 +55,11 @@ export const UIMapper = ({ message }: UIMapperProps) => {
 
     return (
       <div className="w-full space-y-3 max-w-full">
-        {/* Show AI message if available */}
+        {/* Show AI message if available - with text reveal effect */}
         {message.content && message.content.trim() && (
           <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-              {message.content}
+              {displayedText}
             </p>
           </div>
         )}
@@ -87,11 +98,11 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     const orderData = message.data?.[0] || {};
     return (
       <div className="w-full space-y-3 max-w-full">
-        {/* Show AI message if available */}
+        {/* Show AI message if available - with text reveal effect */}
         {message.content && message.content.trim() && (
           <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-              {message.content}
+              {displayedText}
             </p>
           </div>
         )}
@@ -109,11 +120,11 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     );
   }
 
-  // Default: render as text
+  // Default: render as text - with text reveal effect
   return (
     <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm">
       <p className="text-sm leading-relaxed whitespace-pre-wrap">
-        {message.content}
+        {displayedText}
       </p>
     </div>
   );

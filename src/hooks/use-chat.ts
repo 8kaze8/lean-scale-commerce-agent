@@ -27,11 +27,29 @@ function extractOrderId(text: string): string | undefined {
 }
 
 function extractCouponCode(text: string): string | undefined {
+  // Remove markdown bold/italic markers first
+  const cleanText = text
+    .replace(/\*\*/g, "")
+    .replace(/\*/g, "")
+    .replace(/_/g, "");
+
   // Look for patterns like 'SORRY10', 'code SORRY10', 'coupon code SORRY10'
-  const match =
-    text.match(/(?:code|coupon code)\s+['"]?([A-Z0-9]+)['"]?/i) ||
-    text.match(/['"]([A-Z0-9]{4,})['"]/);
-  return match ? match[1] : undefined;
+  // Try multiple patterns
+  const patterns = [
+    /(?:code|coupon code)\s+['"]?([A-Z0-9]{4,})['"]?/i, // "coupon code SORRY10"
+    /['"]([A-Z0-9]{4,})['"]/, // "SORRY10"
+    /\b([A-Z]{4,}\d+)\b/, // SORRY10 (word boundary)
+    /(?:code|coupon)\s+([A-Z0-9]{4,})/i, // "code SORRY10"
+  ];
+
+  for (const pattern of patterns) {
+    const match = cleanText.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return undefined;
 }
 
 function extractStatus(text: string): string | undefined {
@@ -165,11 +183,17 @@ export const useChat = (): UseChatReturn => {
               messageType = "order-status";
               // Parse order information from the message text
               const orderText = nestedOutput.output || "";
+              const extractedCoupon = extractCouponCode(orderText);
+              console.log(
+                "Extracted Coupon Code:",
+                extractedCoupon,
+                "from text:",
+                orderText
+              );
               const orderData: any = {
                 status: nestedOutput.status || extractStatus(orderText),
                 orderId: nestedOutput.orderId || extractOrderId(orderText),
-                couponCode:
-                  nestedOutput.couponCode || extractCouponCode(orderText),
+                couponCode: nestedOutput.couponCode || extractedCoupon,
                 expectedDeliveryDate:
                   nestedOutput.expectedDeliveryDate ||
                   nestedOutput.deliveryDate ||
