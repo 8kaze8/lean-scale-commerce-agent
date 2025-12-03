@@ -37,67 +37,64 @@ export const useChat = (): UseChatReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef<string>(`LSC-${generateUUID()}`);
 
-  const sendMessage = useCallback(
-    async (message: string) => {
-      if (!message.trim()) {
-        return;
+  const sendMessage = useCallback(async (message: string) => {
+    if (!message.trim()) {
+      return;
+    }
+
+    // Add user message immediately
+    const userMessage: ChatMessage = {
+      role: "user",
+      content: message.trim(),
+      id: generateUUID(),
+      type: "text",
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chatInput: message.trim(),
+          sessionId: sessionIdRef.current,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Add user message immediately
-      const userMessage: ChatMessage = {
-        role: "user",
-        content: message.trim(),
+      const responseText = await response.text();
+      const cleanResponse = responseText.trim();
+
+      // Add bot response
+      const botMessage: ChatMessage = {
+        role: "bot",
+        content: cleanResponse,
         id: generateUUID(),
         type: "text",
       };
 
-      setMessages((prev) => [...prev, userMessage]);
-      setIsLoading(true);
-
-      try {
-        const response = await fetch(WEBHOOK_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chatInput: message.trim(),
-            sessionId: sessionIdRef.current,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const responseText = await response.text();
-        const cleanResponse = responseText.trim();
-
-        // Add bot response
-        const botMessage: ChatMessage = {
-          role: "bot",
-          content: cleanResponse,
-          id: generateUUID(),
-          type: "text",
-        };
-
-        setMessages((prev) => [...prev, botMessage]);
-      } catch (error) {
-        console.error("Error sending message:", error);
-        // Add error message
-        const errorMessage: ChatMessage = {
-          role: "bot",
-          content: "Sorry, I encountered an error. Please try again.",
-          id: generateUUID(),
-          type: "text",
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      // Add error message
+      const errorMessage: ChatMessage = {
+        role: "bot",
+        content: "Sorry, I encountered an error. Please try again.",
+        id: generateUUID(),
+        type: "text",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     messages,
@@ -106,4 +103,3 @@ export const useChat = (): UseChatReturn => {
     sessionId: sessionIdRef.current,
   };
 };
-
