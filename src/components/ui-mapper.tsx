@@ -7,6 +7,7 @@ import { ChatMessage } from "@/src/hooks/use-chat";
 interface UIMapperProps {
   message: ChatMessage & {
     data?: any[];
+    products?: any[];
   };
 }
 
@@ -17,16 +18,24 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     // TODO: Implement cart functionality
   };
 
+  // Get products from data array or products array
+  const products = message.data || message.products || [];
+
   switch (message.type) {
     case "product-list":
-      if (!message.data || !Array.isArray(message.data)) {
+    case "product_recommendation":
+      if (!products || !Array.isArray(products) || products.length === 0) {
         // Fallback to text if data is invalid
-        return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+        return (
+          <div className="rounded-lg px-4 py-2 bg-muted text-muted-foreground">
+            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          </div>
+        );
       }
 
       return (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
-          {message.data.map((product: any, index: number) => (
+          {products.map((product: any, index: number) => (
             <ProductCard
               key={product.id || index}
               id={product.id || index}

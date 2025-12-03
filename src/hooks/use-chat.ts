@@ -76,10 +76,6 @@ export const useChat = (): UseChatReturn => {
       }
 
       const responseText = await response.text();
-
-      // Debug: log raw response first
-      console.log("Raw n8n Response:", responseText);
-
       let cleanResponse = responseText.trim();
       let messageType: "product-list" | "order-status" | "text" = "text";
       let messageData: any[] | undefined = undefined;
@@ -88,12 +84,39 @@ export const useChat = (): UseChatReturn => {
       try {
         const jsonResponse = JSON.parse(cleanResponse);
 
-        // Debug: log the parsed response
-        console.log("Parsed n8n Response:", jsonResponse);
-
-        // Check if response has structured data for Generative UI
-        if (jsonResponse.type) {
+        // Check if response has nested output structure (n8n Format Structured Output format)
+        // This must be checked FIRST before other type checks
+        if (
+          jsonResponse.output &&
+          typeof jsonResponse.output === "object" &&
+          !Array.isArray(jsonResponse.output) &&
+          (jsonResponse.output.products || jsonResponse.output.type)
+        ) {
+          const nestedOutput = jsonResponse.output;
+          // Extract type and products from nested output
+          if (nestedOutput.type) {
+            messageType =
+              nestedOutput.type === "product_recommendation"
+                ? "product-list"
+                : nestedOutput.type;
+          }
+          if (nestedOutput.products && Array.isArray(nestedOutput.products)) {
+            messageData = nestedOutput.products;
+          } else if (nestedOutput.data && Array.isArray(nestedOutput.data)) {
+            messageData = nestedOutput.data;
+          }
+          cleanResponse =
+            nestedOutput.output ||
+            nestedOutput.content ||
+            JSON.stringify(nestedOutput, null, 2);
+        }
+        // Check if response has structured data for Generative UI (only if nested wasn't found)
+        else if (jsonResponse.type) {
           messageType = jsonResponse.type;
+          // product_recommendation -> product-list'e çevir
+          if (jsonResponse.type === "product_recommendation") {
+            messageType = "product-list";
+          }
           // Check for products array (n8n format)
           if (jsonResponse.products && Array.isArray(jsonResponse.products)) {
             messageData = jsonResponse.products;
@@ -113,6 +136,22 @@ export const useChat = (): UseChatReturn => {
             messageType = "product-list";
             messageData = jsonResponse.products;
             cleanResponse = outputStr;
+          }
+          // Check if output object has products (nested structure)
+          else if (
+            jsonResponse.output &&
+            typeof jsonResponse.output === "object" &&
+            jsonResponse.output.products
+          ) {
+            messageType =
+              jsonResponse.output.type === "product_recommendation"
+                ? "product-list"
+                : jsonResponse.output.type || "product-list";
+            messageData = jsonResponse.output.products;
+            cleanResponse =
+              typeof jsonResponse.output.output === "string"
+                ? jsonResponse.output.output
+                : outputStr;
           }
           // Check if response has data array at root level
           else if (jsonResponse.data && Array.isArray(jsonResponse.data)) {
@@ -175,9 +214,6 @@ export const useChat = (): UseChatReturn => {
         // If not JSON, use the text as is
         cleanResponse = responseText.trim();
       }
-
-      // Debug: log what we're setting
-      console.log("Message Type:", messageType, "Data:", messageData);
 
       // Add bot response
       const botMessage: ChatMessage = {
