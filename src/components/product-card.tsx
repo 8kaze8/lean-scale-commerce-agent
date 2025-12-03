@@ -34,13 +34,13 @@ export const ProductCard = ({
     imageUrl.startsWith("http");
 
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow overflow-hidden">
-      <div className="aspect-square w-full overflow-hidden bg-muted flex items-center justify-center relative">
+    <Card className="group shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border-border/50 hover:border-primary/20">
+      <div className="aspect-square w-full overflow-hidden bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center relative">
         {hasValidImage ? (
           <img
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               // Hide image on error, placeholder will show
               e.currentTarget.style.display = "none";
@@ -51,13 +51,13 @@ export const ProductCard = ({
         {!hasValidImage && (
           <div className="flex items-center justify-center w-full h-full absolute inset-0">
             <svg
-              width="64"
-              height="64"
+              width="48"
+              height="48"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="text-muted-foreground"
+              className="text-muted-foreground/60"
             >
               <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" />
               <path d="M9 9h6v6H9z" strokeLinecap="round" />
@@ -65,12 +65,16 @@ export const ProductCard = ({
           </div>
         )}
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-sm mb-2 line-clamp-2">{name}</h3>
-        <p className="font-bold text-lg mb-3 text-primary">{formattedPrice}</p>
+      <CardContent className="p-4 space-y-3">
+        <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[2.5rem] text-foreground">
+          {name}
+        </h3>
+        <div className="flex items-baseline justify-between">
+          <p className="font-bold text-xl text-primary">{formattedPrice}</p>
+        </div>
         <Button
           onClick={() => onAddToCart(id)}
-          className="w-full"
+          className="w-full font-medium"
           size="sm"
         >
           Add to Cart

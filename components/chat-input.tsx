@@ -31,19 +31,20 @@ export const ChatInput = ({ onSend, isLoading }: ChatInputProps) => {
   };
 
   return (
-    <div className="flex gap-2 p-3 border-t bg-background">
+    <div className="flex gap-2 p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <Input
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyPress}
         placeholder="Type your message..."
         disabled={isLoading}
-        className="flex-1"
+        className="flex-1 rounded-full border-2 focus:border-primary/50 transition-colors"
       />
       <Button
         onClick={handleSend}
         disabled={isLoading || !input.trim()}
         size="icon"
+        className="rounded-full shrink-0"
       >
         <Send className="h-4 w-4" />
       </Button>

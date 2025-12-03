@@ -87,6 +87,10 @@ export const useChat = (): UseChatReturn => {
       }
 
       const responseText = await response.text();
+
+      // Debug: log raw response
+      console.log("Raw n8n Response:", responseText);
+
       let cleanResponse = responseText.trim();
       let messageType: "product-list" | "order-status" | "text" = "text";
       let messageData: any[] | undefined = undefined;
@@ -94,6 +98,9 @@ export const useChat = (): UseChatReturn => {
       // Try to parse JSON response
       try {
         const jsonResponse = JSON.parse(cleanResponse);
+
+        // Debug: log parsed response
+        console.log("Parsed n8n Response:", jsonResponse);
 
         // Check if response has nested output structure (n8n Format Structured Output format)
         // This must be checked FIRST before other type checks
@@ -106,10 +113,16 @@ export const useChat = (): UseChatReturn => {
           const nestedOutput = jsonResponse.output;
           // Extract type and products from nested output
           if (nestedOutput.type) {
-            messageType =
-              nestedOutput.type === "product_recommendation"
-                ? "product-list"
-                : nestedOutput.type;
+            const typeStr = nestedOutput.type.toLowerCase();
+            if (
+              typeStr === "product_recommendation" ||
+              typeStr === "product recommendation" ||
+              typeStr.includes("product")
+            ) {
+              messageType = "product-list";
+            } else {
+              messageType = nestedOutput.type as any;
+            }
           }
           if (nestedOutput.products && Array.isArray(nestedOutput.products)) {
             messageData = nestedOutput.products;
@@ -123,10 +136,16 @@ export const useChat = (): UseChatReturn => {
         }
         // Check if response has structured data for Generative UI (only if nested wasn't found)
         else if (jsonResponse.type) {
-          messageType = jsonResponse.type;
-          // product_recommendation -> product-list'e çevir
-          if (jsonResponse.type === "product_recommendation") {
+          const typeStr = String(jsonResponse.type).toLowerCase();
+          // product_recommendation or Product Recommendation -> product-list'e çevir
+          if (
+            typeStr === "product_recommendation" ||
+            typeStr === "product recommendation" ||
+            typeStr.includes("product")
+          ) {
             messageType = "product-list";
+          } else {
+            messageType = jsonResponse.type as any;
           }
           // Check for products array (n8n format)
           if (jsonResponse.products && Array.isArray(jsonResponse.products)) {
@@ -225,6 +244,11 @@ export const useChat = (): UseChatReturn => {
         // If not JSON, use the text as is
         cleanResponse = responseText.trim();
       }
+
+      // Debug: log final message data
+      console.log("Final Message Type:", messageType);
+      console.log("Final Message Data:", messageData);
+      console.log("Final Clean Response:", cleanResponse);
 
       // Add bot response
       const botMessage: ChatMessage = {
