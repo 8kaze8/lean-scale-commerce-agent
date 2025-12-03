@@ -43,7 +43,16 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     }
 
     return (
-      <div className="w-full">
+      <div className="w-full space-y-3 max-w-full">
+        {/* Show AI message if available */}
+        {message.content && message.content.trim() && (
+          <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+              {message.content}
+            </p>
+          </div>
+        )}
+        {/* Product cards */}
         <div 
           className="overflow-x-auto scrollbar-hide scroll-smooth py-2"
           style={{ 

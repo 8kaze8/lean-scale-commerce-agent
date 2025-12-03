@@ -37,7 +37,7 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
           </p>
         </div>
       ) : (
-        <div className={cn("w-full")}>
+        <div className={cn("w-full max-w-full min-w-0")}>
           <UIMapper message={message} />
         </div>
       )}
