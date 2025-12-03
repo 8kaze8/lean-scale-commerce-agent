@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, CheckCircle2, AlertCircle } from "lucide-react";
+import { Package, CheckCircle2, AlertCircle, Truck } from "lucide-react";
 import { CouponBadge } from "./coupon-badge";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ export const OrderBox = ({
   const normalizedStatus = status?.toLowerCase() || "";
   const isDelivered = normalizedStatus === "delivered";
   const isDelayed = normalizedStatus === "delayed";
+  const isShipped = normalizedStatus === "shipped";
 
   return (
     <Card className="shadow-md">
@@ -46,6 +47,8 @@ export const OrderBox = ({
               <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
             ) : isDelayed ? (
               <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+            ) : isShipped ? (
+              <Truck className="h-5 w-5 text-yellow-600 shrink-0" />
             ) : (
               <Package className="h-5 w-5 text-muted-foreground shrink-0" />
             )}
@@ -55,7 +58,8 @@ export const OrderBox = ({
                 className={cn(
                   "text-sm font-medium",
                   isDelivered && "text-green-600",
-                  isDelayed && "text-red-600"
+                  isDelayed && "text-red-600",
+                  isShipped && "text-yellow-600"
                 )}
               >
                 {status}
@@ -66,7 +70,9 @@ export const OrderBox = ({
 
         {expectedDeliveryDate && (
           <div>
-            <span className="text-sm font-semibold">Expected Delivery: </span>
+            <span className="text-sm font-semibold">
+              {isDelivered ? "Date of Delivery: " : "Expected Delivery: "}
+            </span>
             <span className="text-sm">{expectedDeliveryDate}</span>
           </div>
         )}

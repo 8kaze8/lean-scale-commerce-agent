@@ -94,7 +94,18 @@ export const UIMapper = ({ message }: UIMapperProps) => {
   }
 
   // Handle order status
-  if (normalizedType === "order-status" || normalizedType.includes("order")) {
+  if (
+    normalizedType === "order-status" ||
+    normalizedType.includes("order") ||
+    normalizedType === "shipped" ||
+    normalizedType === "delivered" ||
+    normalizedType === "delayed" ||
+    normalizedType === "processing" ||
+    normalizedType === "pending" ||
+    normalizedType.includes("delivery") || // DELIVERY_CONFIRMATION, DELIVERY_NOTIFICATION
+    normalizedType.includes("confirmation") ||
+    normalizedType.includes("notification")
+  ) {
     const orderData = message.data?.[0] || {};
     return (
       <div className="w-full space-y-3 max-w-full">

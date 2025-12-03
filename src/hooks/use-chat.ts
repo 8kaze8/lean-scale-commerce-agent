@@ -54,23 +54,50 @@ function extractCouponCode(text: string): string | undefined {
 
 function extractStatus(text: string): string | undefined {
   const lowerText = text.toLowerCase();
+  // Check in order of specificity - look for exact status words
+  // Use word boundaries to avoid partial matches
+  if (/\bshipped\b/.test(lowerText)) return "Shipped";
+  if (/\bdelivered\b/.test(lowerText)) return "Delivered";
+  if (/\bdelayed\b/.test(lowerText)) return "Delayed";
+  if (/\bprocessing\b/.test(lowerText)) return "Processing";
+  if (/\bpending\b/.test(lowerText)) return "Pending";
+  if (/\bcancelled\b/.test(lowerText) || /\bcanceled\b/.test(lowerText))
+    return "Cancelled";
+  // Fallback to simple includes if word boundary doesn't match
+  if (lowerText.includes("shipped")) return "Shipped";
   if (lowerText.includes("delivered")) return "Delivered";
   if (lowerText.includes("delayed")) return "Delayed";
   if (lowerText.includes("processing")) return "Processing";
-  if (lowerText.includes("shipped")) return "Shipped";
   return undefined;
 }
 
 function extractDeliveryDate(text: string): string | undefined {
-  // Look for date patterns like "2024-12-02", "2024/12/02", "December 2, 2024"
+  // Look for date patterns like "2024-12-02", "2024/12/02", "December 5, 2024", "December 5th, 2024"
   const datePatterns = [
-    /\d{4}-\d{2}-\d{2}/,
-    /\d{4}\/\d{2}\/\d{2}/,
-    /(?:on|before|by)\s+(\d{4}-\d{2}-\d{2})/i,
+    /\d{4}-\d{2}-\d{2}/, // 2024-12-05
+    /\d{4}\/\d{2}\/\d{2}/, // 2024/12/05
+    /(?:on|before|by|delivered by)\s+(\d{4}-\d{2}-\d{2})/i, // by 2024-12-05
+    /(?:on|before|by|delivered by)\s+([A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})/i, // December 5, 2024 or December 5th, 2024
+    /([A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})/, // December 5, 2024 (standalone)
   ];
+
   for (const pattern of datePatterns) {
     const match = text.match(pattern);
-    if (match) return match[1] || match[0];
+    if (match) {
+      const dateStr = match[1] || match[0];
+      // If it's a written date like "December 5, 2024", try to convert to YYYY-MM-DD
+      if (dateStr.includes(",") || /[A-Za-z]/.test(dateStr)) {
+        try {
+          const date = new Date(dateStr);
+          if (!isNaN(date.getTime())) {
+            return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD
+          }
+        } catch {
+          // If conversion fails, return as is
+        }
+      }
+      return dateStr;
+    }
   }
   return undefined;
 }
@@ -178,20 +205,37 @@ export const useChat = (): UseChatReturn => {
             } else if (
               typeStr === "order status" ||
               typeStr === "order_status" ||
-              typeStr.includes("order")
+              typeStr.includes("order") ||
+              typeStr === "shipped" ||
+              typeStr === "delivered" ||
+              typeStr === "delayed" ||
+              typeStr === "processing" ||
+              typeStr === "pending" ||
+              typeStr.includes("delivery") || // DELIVERY_CONFIRMATION, DELIVERY_NOTIFICATION
+              typeStr.includes("confirmation") ||
+              typeStr.includes("notification")
             ) {
               messageType = "order-status";
               // Parse order information from the message text
               const orderText = nestedOutput.output || "";
               const extractedCoupon = extractCouponCode(orderText);
+              const extractedStatus = extractStatus(orderText);
               console.log(
                 "Extracted Coupon Code:",
                 extractedCoupon,
                 "from text:",
                 orderText
               );
+              console.log(
+                "Extracted Status:",
+                extractedStatus,
+                "from text:",
+                orderText
+              );
+              console.log("nestedOutput.status:", nestedOutput.status);
               const orderData: any = {
-                status: nestedOutput.status || extractStatus(orderText),
+                // Prefer nestedOutput.status if available, otherwise extract from text
+                status: nestedOutput.status || extractedStatus,
                 orderId: nestedOutput.orderId || extractOrderId(orderText),
                 couponCode: nestedOutput.couponCode || extractedCoupon,
                 expectedDeliveryDate:
