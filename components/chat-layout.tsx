@@ -7,6 +7,7 @@ import { Bot, User } from "lucide-react";
 import { ChatInput } from "./chat-input";
 import { useChat } from "@/src/hooks/use-chat";
 import { ChatMessage } from "@/src/hooks/use-chat";
+import { UIMapper } from "@/src/components/ui-mapper";
 import { cn } from "@/lib/utils";
 
 const MessageBubble = ({ message }: { message: ChatMessage }) => {
@@ -23,16 +24,19 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
           </AvatarFallback>
         </Avatar>
       )}
-      <div
-        className={cn(
-          "max-w-[80%] rounded-lg px-4 py-2",
-          isUser
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground"
-        )}
-      >
-        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-      </div>
+      {isUser ? (
+        <div
+          className={cn(
+            "max-w-[80%] rounded-lg px-4 py-2 bg-primary text-primary-foreground"
+          )}
+        >
+          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        </div>
+      ) : (
+        <div className={cn("max-w-[100%]")}>
+          <UIMapper message={message} />
+        </div>
+      )}
       {isUser && (
         <Avatar className="size-8 shrink-0">
           <AvatarFallback className="bg-secondary text-secondary-foreground">
