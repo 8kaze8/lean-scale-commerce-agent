@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface ChatMessage {
   role: "user" | "bot";
@@ -119,6 +120,7 @@ export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+  const { toast } = useToast();
 
   // Initialize sessionId only on client side
   if (typeof window !== "undefined" && !sessionIdRef.current) {
@@ -403,24 +405,53 @@ export const useChat = (): UseChatReturn => {
 
       // Provide more specific error messages
       let errorContent = "Sorry, I encountered an error. Please try again.";
+      let toastTitle = "Error";
+      let toastDescription = "An unexpected error occurred. Please try again.";
 
       if (error instanceof Error) {
         if (error.message.includes("500")) {
           errorContent =
             "I'm having trouble processing your request right now. This might be a policy-related query that needs additional configuration. Please try again in a moment or rephrase your question.";
+          toastTitle = "Server Error";
+          toastDescription =
+            "The server is having trouble processing your request. Please try again in a moment.";
         } else if (error.message.includes("404")) {
           errorContent =
             "The service is temporarily unavailable. Please try again later.";
+          toastTitle = "Service Unavailable";
+          toastDescription =
+            "The service is temporarily unavailable. Please try again later.";
         } else if (
           error.message.includes("network") ||
-          error.message.includes("fetch")
+          error.message.includes("fetch") ||
+          error.message.includes("Failed to fetch")
         ) {
           errorContent =
             "Network error. Please check your connection and try again.";
+          toastTitle = "Network Error";
+          toastDescription =
+            "Please check your internet connection and try again.";
+        } else if (
+          error.message.includes("timeout") ||
+          error.message.includes("aborted")
+        ) {
+          errorContent = "The request took too long. Please try again.";
+          toastTitle = "Request Timeout";
+          toastDescription =
+            "The request took too long to complete. Please try again.";
+        } else {
+          toastDescription = error.message || "An unexpected error occurred.";
         }
       }
 
-      // Add error message
+      // Show toast notification
+      toast({
+        variant: "destructive",
+        title: toastTitle,
+        description: toastDescription,
+      });
+
+      // Add error message to chat
       const errorMessage: ChatMessage = {
         role: "bot",
         content: errorContent,
