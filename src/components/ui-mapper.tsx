@@ -84,12 +84,15 @@ export const UIMapper = ({ message }: UIMapperProps) => {
 
   // Handle order status
   if (normalizedType === "order-status" || normalizedType.includes("order")) {
+    const orderData = message.data?.[0] || {};
     return (
       <div className="p-4">
         <OrderBox
-          orderId={message.data?.[0]?.orderId}
-          status={message.data?.[0]?.status}
-          items={message.data?.[0]?.items}
+          orderId={orderData.orderId}
+          status={orderData.status}
+          items={orderData.items}
+          couponCode={orderData.couponCode || orderData.coupon}
+          expectedDeliveryDate={orderData.expectedDeliveryDate || orderData.deliveryDate}
         />
       </div>
     );

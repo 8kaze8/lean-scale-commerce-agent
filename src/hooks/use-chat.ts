@@ -20,6 +20,43 @@ interface UseChatReturn {
 const WEBHOOK_URL =
   "https://n8n.burakcanpolat.dev/webhook/cbc523be-3838-4b41-a3fa-839e89f4e29e/chat";
 
+// Helper functions to extract order information from text
+function extractOrderId(text: string): string | undefined {
+  const match = text.match(/ORD-?\d+/i);
+  return match ? match[0] : undefined;
+}
+
+function extractCouponCode(text: string): string | undefined {
+  // Look for patterns like 'SORRY10', 'code SORRY10', 'coupon code SORRY10'
+  const match =
+    text.match(/(?:code|coupon code)\s+['"]?([A-Z0-9]+)['"]?/i) ||
+    text.match(/['"]([A-Z0-9]{4,})['"]/);
+  return match ? match[1] : undefined;
+}
+
+function extractStatus(text: string): string | undefined {
+  const lowerText = text.toLowerCase();
+  if (lowerText.includes("delivered")) return "Delivered";
+  if (lowerText.includes("delayed")) return "Delayed";
+  if (lowerText.includes("processing")) return "Processing";
+  if (lowerText.includes("shipped")) return "Shipped";
+  return undefined;
+}
+
+function extractDeliveryDate(text: string): string | undefined {
+  // Look for date patterns like "2024-12-02", "2024/12/02", "December 2, 2024"
+  const datePatterns = [
+    /\d{4}-\d{2}-\d{2}/,
+    /\d{4}\/\d{2}\/\d{2}/,
+    /(?:on|before|by)\s+(\d{4}-\d{2}-\d{2})/i,
+  ];
+  for (const pattern of datePatterns) {
+    const match = text.match(pattern);
+    if (match) return match[1] || match[0];
+  }
+  return undefined;
+}
+
 // Generate UUID v4
 function generateUUID(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -120,14 +157,46 @@ export const useChat = (): UseChatReturn => {
               typeStr.includes("product")
             ) {
               messageType = "product-list";
+            } else if (
+              typeStr === "order status" ||
+              typeStr.includes("order")
+            ) {
+              messageType = "order-status";
+              // Parse order information from the message text
+              const orderText = nestedOutput.output || "";
+              const orderData: any = {
+                status: nestedOutput.status || extractStatus(orderText),
+                orderId: nestedOutput.orderId || extractOrderId(orderText),
+                couponCode:
+                  nestedOutput.couponCode || extractCouponCode(orderText),
+                expectedDeliveryDate:
+                  nestedOutput.expectedDeliveryDate ||
+                  nestedOutput.deliveryDate ||
+                  extractDeliveryDate(orderText),
+                items: nestedOutput.items || [],
+              };
+              console.log("Order Data Parsed:", orderData);
+              messageData = [orderData];
+              // Don't override messageData for order-status, skip products check
             } else {
               messageType = nestedOutput.type as any;
             }
           }
-          if (nestedOutput.products && Array.isArray(nestedOutput.products)) {
-            messageData = nestedOutput.products;
-          } else if (nestedOutput.data && Array.isArray(nestedOutput.data)) {
-            messageData = nestedOutput.data;
+          // Only check for products if it's not order-status (to avoid overriding orderData)
+          if (messageType !== "order-status") {
+            if (
+              nestedOutput.products &&
+              Array.isArray(nestedOutput.products) &&
+              nestedOutput.products.length > 0
+            ) {
+              messageData = nestedOutput.products;
+            } else if (
+              nestedOutput.data &&
+              Array.isArray(nestedOutput.data) &&
+              nestedOutput.data.length > 0
+            ) {
+              messageData = nestedOutput.data;
+            }
           }
           cleanResponse =
             nestedOutput.output ||
