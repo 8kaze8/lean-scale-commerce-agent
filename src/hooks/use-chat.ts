@@ -120,6 +120,7 @@ export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
+  const messageTimestampsRef = useRef<number[]>([]); // Track message timestamps for rate limiting
   const { toast } = useToast();
 
   // Initialize sessionId only on client side
@@ -131,6 +132,32 @@ export const useChat = (): UseChatReturn => {
     if (!message.trim()) {
       return;
     }
+
+    // Rate limiting: Check if user has sent too many messages in the last minute
+    const now = Date.now();
+    const oneMinuteAgo = now - 60 * 1000; // 1 minute in milliseconds
+    const MAX_MESSAGES_PER_MINUTE = 5;
+
+    // Remove timestamps older than 1 minute
+    messageTimestampsRef.current = messageTimestampsRef.current.filter(
+      (timestamp) => timestamp > oneMinuteAgo
+    );
+
+    // Check if limit is exceeded
+    if (messageTimestampsRef.current.length >= MAX_MESSAGES_PER_MINUTE) {
+      const remainingSeconds = Math.ceil(
+        (messageTimestampsRef.current[0] + 60 * 1000 - now) / 1000
+      );
+      toast({
+        variant: "destructive",
+        title: "Rate Limit Exceeded",
+        description: `You can send a maximum of ${MAX_MESSAGES_PER_MINUTE} messages per minute. Please wait ${remainingSeconds} second${remainingSeconds !== 1 ? "s" : ""} before sending another message.`,
+      });
+      return;
+    }
+
+    // Add current timestamp to the array
+    messageTimestampsRef.current.push(now);
 
     // Add user message immediately
     const userMessage: ChatMessage = {

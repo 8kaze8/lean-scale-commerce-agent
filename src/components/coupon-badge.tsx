@@ -15,11 +15,39 @@ export const CouponBadge = ({ code, className }: CouponBadgeProps) => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Try modern Clipboard API first (works on HTTPS and localhost)
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+
+      // Fallback: Use document.execCommand for older browsers or HTTP
+      const textArea = document.createElement("textarea");
+      textArea.value = code;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const successful = document.execCommand("copy");
+        if (successful) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } else {
+          throw new Error("execCommand failed");
+        }
+      } finally {
+        document.body.removeChild(textArea);
+      }
     } catch (error) {
       console.error("Failed to copy:", error);
+      // Show a fallback message or toast if needed
+      // For now, we'll just log the error
     }
   };
 

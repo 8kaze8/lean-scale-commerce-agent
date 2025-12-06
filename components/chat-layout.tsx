@@ -9,6 +9,7 @@ import { ChatMessage } from "@/src/hooks/use-chat";
 import { BotMessage } from "@/src/components/bot-message";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 
 const MessageBubble = ({ message }: { message: ChatMessage }) => {
   const isUser = message.role === "user";
@@ -56,6 +57,33 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
 
 export const ChatLayout = () => {
   const { messages, isLoading, sendMessage } = useChat();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change or loading state changes
+  useEffect(() => {
+    const scrollToBottom = () => {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTo({
+            top: messagesContainerRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    };
+
+    // Scroll when messages change
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+
+    // Also scroll when loading state changes (AI is responding)
+    if (isLoading) {
+      scrollToBottom();
+    }
+  }, [messages, isLoading]);
 
   return (
     <Card className="flex flex-col h-[calc(100vh-theme(spacing.16))] max-h-[700px] overflow-hidden p-0">
@@ -70,7 +98,10 @@ export const ChatLayout = () => {
       </CardHeader>
 
       {/* Message Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth"
+      >
         <div className="flex flex-col">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center text-muted-foreground">
@@ -109,6 +140,8 @@ export const ChatLayout = () => {
               </motion.div>
             </motion.div>
           )}
+          {/* Invisible element at the bottom for scroll reference */}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 

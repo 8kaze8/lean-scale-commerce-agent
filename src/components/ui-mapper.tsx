@@ -4,6 +4,7 @@ import { ProductCard } from "./product-card";
 import { OrderBox } from "./order-box";
 import { ChatMessage } from "@/src/hooks/use-chat";
 import { useTextReveal } from "@/src/hooks/use-text-reveal";
+import ReactMarkdown from "react-markdown";
 
 interface UIMapperProps {
   message: ChatMessage & {
@@ -35,6 +36,41 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     enabled: shouldAnimateText,
   });
 
+  // Helper function to clean product list from AI message text
+  // Removes markdown product lists (e.g., "* **Product** - **Price**") to avoid duplication
+  const cleanProductListFromText = (text: string): string => {
+    if (!text) return text;
+    
+    // Remove markdown list items that look like products
+    // Pattern: *   **Product Name** - **Price** (with optional spaces)
+    // Also handles: - **Product Name** - **Price**
+    const productListPattern = /^[\s]*[-*]\s+\*\*[^*]+?\*\*\s*-\s*\*\*[^*]+?\*\*[\s]*$/gm;
+    let cleaned = text.replace(productListPattern, "");
+    
+    // Also remove standalone product lines with bold formatting (without list markers)
+    // Pattern: **Product Name** - **Price** (standalone line)
+    const boldProductPattern = /^\s*\*\*[^*]+?\*\*\s*-\s*\*\*[^*]+?\*\*\s*$/gm;
+    cleaned = cleaned.replace(boldProductPattern, "");
+    
+    // Remove lines that are just product names with prices in various formats
+    // Pattern: Product Name - Price (with or without bold)
+    const simpleProductPattern = /^[\s]*[-*]?\s*[^*\n]+?\s*-\s*\d+\s*SAR[\s]*$/gmi;
+    cleaned = cleaned.replace(simpleProductPattern, "");
+    
+    // Clean up multiple consecutive newlines (3+ becomes 2)
+    cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
+    
+    // Remove leading/trailing whitespace from each line
+    cleaned = cleaned
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .join("\n");
+    
+    // Trim and return
+    return cleaned.trim();
+  };
+
   // Check if it's a product list type (handle various formats from n8n)
   if (
     normalizedType === "product-list" ||
@@ -53,14 +89,18 @@ export const UIMapper = ({ message }: UIMapperProps) => {
       );
     }
 
+    // Clean the AI message to remove product list (since we show it in cards)
+    const cleanedContent = cleanProductListFromText(message.content || "");
+    const shouldShowIntroText = cleanedContent && cleanedContent.trim().length > 0;
+
     return (
       <div className="w-full space-y-3 max-w-full">
-        {/* Show AI message if available - with text reveal effect */}
-        {message.content && message.content.trim() && (
+        {/* Show AI intro message if available (cleaned from product list) - with markdown rendering */}
+        {shouldShowIntroText && (
           <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
-            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-              {displayedText}
-            </p>
+            <div className="markdown-content break-words">
+              <ReactMarkdown>{cleanedContent}</ReactMarkdown>
+            </div>
           </div>
         )}
         {/* Product cards */}
@@ -109,12 +149,12 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     const orderData = message.data?.[0] || {};
     return (
       <div className="w-full space-y-3 max-w-full">
-        {/* Show AI message if available - with text reveal effect */}
+        {/* Show AI message if available - with markdown rendering */}
         {message.content && message.content.trim() && (
           <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
-            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-              {displayedText}
-            </p>
+            <div className="markdown-content break-words">
+              <ReactMarkdown>{displayedText}</ReactMarkdown>
+            </div>
           </div>
         )}
         {/* Order Box */}
@@ -131,12 +171,12 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     );
   }
 
-  // Default: render as text - with text reveal effect
+  // Default: render as text - with markdown rendering
   return (
     <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm">
-      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-        {displayedText}
-      </p>
+      <div className="markdown-content break-words">
+        <ReactMarkdown>{displayedText}</ReactMarkdown>
+      </div>
     </div>
   );
 };
