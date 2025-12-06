@@ -22,12 +22,12 @@ const WEBHOOK_URL =
   "https://n8n.burakcanpolat.dev/webhook/cbc523be-3838-4b41-a3fa-839e89f4e29e/chat";
 
 // Helper functions to extract order information from text
-function extractOrderId(text: string): string | undefined {
+export function extractOrderId(text: string): string | undefined {
   const match = text.match(/ORD-?\d+/i);
   return match ? match[0] : undefined;
 }
 
-function extractCouponCode(text: string): string | undefined {
+export function extractCouponCode(text: string): string | undefined {
   // Remove markdown bold/italic markers first
   const cleanText = text
     .replace(/\*\*/g, "")
@@ -53,7 +53,7 @@ function extractCouponCode(text: string): string | undefined {
   return undefined;
 }
 
-function extractStatus(text: string): string | undefined {
+export function extractStatus(text: string): string | undefined {
   const lowerText = text.toLowerCase();
   // Check in order of specificity - look for exact status words
   // Use word boundaries to avoid partial matches
@@ -72,7 +72,7 @@ function extractStatus(text: string): string | undefined {
   return undefined;
 }
 
-function extractDeliveryDate(text: string): string | undefined {
+export function extractDeliveryDate(text: string): string | undefined {
   // Look for date patterns like "2024-12-02", "2024/12/02", "December 5, 2024", "December 5th, 2024"
   const datePatterns = [
     /\d{4}-\d{2}-\d{2}/, // 2024-12-05
