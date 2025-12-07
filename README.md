@@ -588,6 +588,6 @@ This project is created for case study purposes.
 
 **Built with ❤️ for Lean Scale **
 
-[Report Issue](https://github.com/your-username/lean-scale-commerce-agent/issues) • [Request Feature](https://github.com/your-username/lean-scale-commerce-agent/issues) • [Documentation](#-architecture-overview)
+[Report Issue](https://github.com/8kaze8/lean-scale-commerce-agent/issues) • [Request Feature](https://github.com/8kaze8/lean-scale-commerce-agent/issues) • [Documentation](#-architecture-overview)
 
 </div>
