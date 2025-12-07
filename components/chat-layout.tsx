@@ -17,14 +17,14 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
   return (
     <div
       className={cn(
-        "flex gap-3 px-4 py-3",
+        "flex gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3",
         isUser ? "justify-end" : "justify-start"
       )}
     >
       {!isUser && (
-        <Avatar className="size-8 shrink-0 mt-1">
+        <Avatar className="size-7 sm:size-8 shrink-0 mt-1">
           <AvatarFallback className="bg-primary text-primary-foreground">
-            <Bot className="h-4 w-4" />
+            <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </AvatarFallback>
         </Avatar>
       )}
@@ -34,10 +34,10 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
           className={cn(
-            "max-w-[85%] rounded-2xl px-4 py-2.5 bg-primary text-primary-foreground shadow-sm"
+            "max-w-[80%] sm:max-w-[85%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 bg-primary text-primary-foreground shadow-sm"
           )}
         >
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">
             {message.content}
           </p>
         </motion.div>
@@ -45,9 +45,9 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
         <BotMessage message={message} />
       )}
       {isUser && (
-        <Avatar className="size-8 shrink-0 mt-1">
+        <Avatar className="size-7 sm:size-8 shrink-0 mt-1">
           <AvatarFallback className="bg-secondary text-secondary-foreground">
-            <User className="h-4 w-4" />
+            <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </AvatarFallback>
         </Avatar>
       )}
@@ -86,12 +86,12 @@ export const ChatLayout = () => {
   }, [messages, isLoading]);
 
   return (
-    <Card className="flex flex-col h-[calc(100vh-theme(spacing.16))] max-h-[700px] overflow-hidden p-0">
+    <Card className="flex flex-col h-[calc(100vh-1rem)] sm:h-[calc(100vh-theme(spacing.16))] max-h-[700px] overflow-hidden p-0">
       {/* Header */}
-      <CardHeader className="border-b shrink-0 px-6 py-4">
-        <CardTitle className="flex items-center gap-3 text-lg">
-          <div className="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary">
-            <Bot className="h-5 w-5" />
+      <CardHeader className="border-b shrink-0 px-3 sm:px-6 py-3 sm:py-4">
+        <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg">
+          <div className="flex items-center justify-center size-8 sm:size-10 rounded-full bg-primary/10 text-primary">
+            <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <span className="font-semibold">LeanBot AI</span>
         </CardTitle>
@@ -104,9 +104,11 @@ export const ChatLayout = () => {
       >
         <div className="flex flex-col">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center text-muted-foreground">
-              <Bot className="h-12 w-12 mb-4 opacity-50" />
-              <p className="text-sm">Start a conversation with LeanBot AI</p>
+            <div className="flex flex-col items-center justify-center h-full p-4 sm:p-8 text-center text-muted-foreground">
+              <Bot className="h-10 w-10 sm:h-12 sm:w-12 mb-3 sm:mb-4 opacity-50" />
+              <p className="text-xs sm:text-sm">
+                Start a conversation with LeanBot AI
+              </p>
             </div>
           ) : (
             messages.map((message) => (
@@ -118,15 +120,15 @@ export const ChatLayout = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="flex gap-3 px-4 py-3 justify-start"
+              className="flex gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 justify-start"
             >
-              <Avatar className="size-8 shrink-0 mt-1">
+              <Avatar className="size-7 sm:size-8 shrink-0 mt-1">
                 <AvatarFallback className="bg-primary text-primary-foreground">
-                  <Bot className="h-4 w-4" />
+                  <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </AvatarFallback>
               </Avatar>
               <motion.div
-                className="bg-muted text-muted-foreground rounded-2xl px-4 py-2.5 shadow-sm"
+                className="bg-muted text-muted-foreground rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm"
                 animate={{
                   opacity: [0.5, 1, 0.5],
                 }}
@@ -136,7 +138,7 @@ export const ChatLayout = () => {
                   ease: "easeInOut",
                 }}
               >
-                <p className="text-sm">Thinking...</p>
+                <p className="text-xs sm:text-sm">Thinking...</p>
               </motion.div>
             </motion.div>
           )}

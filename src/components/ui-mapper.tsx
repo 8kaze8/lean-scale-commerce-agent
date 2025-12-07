@@ -81,8 +81,8 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     if (!products || !Array.isArray(products) || products.length === 0) {
       // Fallback to text if data is invalid - with text reveal
       return (
-        <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm">
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm">
+          <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">
             {displayedText}
           </p>
         </div>
@@ -94,29 +94,29 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     const shouldShowIntroText = cleanedContent && cleanedContent.trim().length > 0;
 
     return (
-      <div className="w-full space-y-3 max-w-full">
+      <div className="w-full space-y-2 sm:space-y-3 max-w-full">
         {/* Show AI intro message if available (cleaned from product list) - with markdown rendering */}
         {shouldShowIntroText && (
-          <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
-            <div className="markdown-content break-words">
+          <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
+            <div className="markdown-content break-words text-xs sm:text-sm">
               <ReactMarkdown>{cleanedContent}</ReactMarkdown>
             </div>
           </div>
         )}
         {/* Product cards */}
         <div 
-          className="overflow-x-auto scrollbar-hide scroll-smooth py-2"
+          className="overflow-x-auto scrollbar-hide scroll-smooth py-1 sm:py-2 -mx-2 sm:mx-0"
           style={{ 
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
           }}
         >
-          <div className="flex gap-3 px-4 pr-8" style={{ width: 'max-content', minWidth: '100%' }}>
+          <div className="flex gap-2 sm:gap-3 px-2 sm:px-4 pr-4 sm:pr-8" style={{ width: 'max-content', minWidth: '100%' }}>
             {products.map((product: any, index: number) => (
               <div
                 key={product.id || index}
-                className="w-[240px] sm:w-[260px] flex-shrink-0"
+                className="w-[200px] sm:w-[240px] md:w-[260px] flex-shrink-0"
               >
                 <ProductCard
                   id={product.id || index}
@@ -148,17 +148,17 @@ export const UIMapper = ({ message }: UIMapperProps) => {
   ) {
     const orderData = message.data?.[0] || {};
     return (
-      <div className="w-full space-y-3 max-w-full">
+      <div className="w-full space-y-2 sm:space-y-3 max-w-full">
         {/* Show AI message if available - with markdown rendering */}
         {message.content && message.content.trim() && (
-          <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
-            <div className="markdown-content break-words">
+          <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
+            <div className="markdown-content break-words text-xs sm:text-sm">
               <ReactMarkdown>{displayedText}</ReactMarkdown>
             </div>
           </div>
         )}
         {/* Order Box */}
-        <div className="p-4">
+        <div className="p-2 sm:p-4">
           <OrderBox
             orderId={orderData.orderId}
             status={orderData.status}
@@ -173,8 +173,8 @@ export const UIMapper = ({ message }: UIMapperProps) => {
 
   // Default: render as text - with markdown rendering
   return (
-    <div className="rounded-2xl px-4 py-3 bg-muted text-muted-foreground shadow-sm">
-      <div className="markdown-content break-words">
+    <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm">
+      <div className="markdown-content break-words text-xs sm:text-sm">
         <ReactMarkdown>{displayedText}</ReactMarkdown>
       </div>
     </div>

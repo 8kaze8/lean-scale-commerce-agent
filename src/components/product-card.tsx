@@ -65,16 +65,16 @@ export const ProductCard = ({
           </div>
         )}
       </div>
-      <CardContent className="p-4 space-y-3">
-        <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[2.5rem] text-foreground">
+      <CardContent className="p-3 sm:p-4 space-y-2 sm:space-y-3">
+        <h3 className="font-semibold text-xs sm:text-sm leading-snug line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] text-foreground">
           {name}
         </h3>
         <div className="flex items-baseline justify-between">
-          <p className="font-bold text-xl text-primary">{formattedPrice}</p>
+          <p className="font-bold text-lg sm:text-xl text-primary">{formattedPrice}</p>
         </div>
         <Button
           onClick={() => onAddToCart(id)}
-          className="w-full font-medium"
+          className="w-full font-medium text-xs sm:text-sm"
           size="sm"
         >
           Add to Cart

@@ -54,15 +54,15 @@ export const CouponBadge = ({ code, className }: CouponBadgeProps) => {
   return (
     <div
       className={cn(
-        "border-2 border-dashed border-primary/30 rounded-lg p-4 bg-primary/5 flex items-center justify-between gap-3",
+        "border-2 border-dashed border-primary/30 rounded-lg p-3 sm:p-4 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3",
         className
       )}
     >
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
           Coupon Code:
         </span>
-        <span className="text-lg font-bold text-primary font-mono">
+        <span className="text-base sm:text-lg font-bold text-primary font-mono break-all">
           {code}
         </span>
       </div>
@@ -70,16 +70,16 @@ export const CouponBadge = ({ code, className }: CouponBadgeProps) => {
         onClick={handleCopy}
         size="sm"
         variant="outline"
-        className="shrink-0"
+        className="shrink-0 w-full sm:w-auto text-xs sm:text-sm"
       >
         {copied ? (
           <>
-            <Check className="h-4 w-4 mr-1" />
+            <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Copied
           </>
         ) : (
           <>
-            <Copy className="h-4 w-4 mr-1" />
+            <Copy className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Copy
           </>
         )}
