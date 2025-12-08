@@ -1,0 +1,11 @@
+﻿test_id,category,input,expected_facts,source_policy
+TEST-001,Product Search (Specific),I want to buy the Titanium iPhone 15 Pro Max.,Intent: product_search. Must find 'Apple iPhone 15 Pro Max' (5199 SAR). Verify 'Titanium' feature.,Vector Store
+TEST-002,Policy (High Value),I am ordering the Samsung S24 Ultra and iPhone 15. Do I need ID?,Intent: policy_query. Yes. Orders > 5000 SAR (iPhone 5199 + S24 4999) require ID verification per Section 1.6.,Section 1.6
+TEST-003,Product Search (Filter),Show me cheap fashion accessories under 200 SAR.,Intent: product_search. Must return 'Silk Scarf' (150 SAR). Do NOT show 'Gucci Bag' (4500 SAR).,Metadata & Vector
+TEST-004,Order Tracking (Delayed),Where is my order ORD-1003? It is late.,Intent: order_tracking. Status: Delayed (S24 Ultra). Must offer 'SORRY10' coupon and apologize immediately.,Order DB (ORD-1003)
+TEST-005,Order Tracking (Shipped),Track my order ORD-1002 please.,Intent: order_tracking. Status: Shipped (Dyson Airwrap). Expected Delivery: 2024-12-05. No apology needed.,Order DB (ORD-1002)
+TEST-006,Product Search (Feature),Do you have any noise cancelling headphones?,Intent: product_search. Must return 'Apple AirPods Pro (2nd Generation)'. Keyword: Active Noise Cancellation.,Vector Search
+TEST-007,Policy (Return - Fashion),Can I return the Black Chiffon Abaya if it doesn't fit?,Intent: return_policy. Yes Fashion items are returnable (15 days) if unused. Riyadh: VIP Pickup / Others: Drop-off.,Section 2.1
+TEST-008,Payment (COD),I want to pay Cash on Delivery for the Nike Air Jordans.,Intent: payment_policy. COD is available. Fee: 20 SAR (Non-refundable). Total approx 919 SAR.,Section 1.4
+TEST-009,Order Tracking (Delivered),What is the status of ORD-1001?,Intent: order_tracking. Status: Delivered (PlayStation 5). Ask if customer is happy with the product.,Order DB (ORD-1001)
+TEST-010,Product Search (Arabic),أبحث عن عباية سوداء (I am looking for a black abaya),Intent: product_search. Language: Arabic. Must return 'Luxury Black Chiffon Abaya'. Response in ARABIC.,Language Rule

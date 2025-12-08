@@ -1,0 +1,11 @@
+order_id,customer_email,status,items,total_amount,expected_delivery,tracking_url,customer_city,payment_method
+ORD-1001,ahmed.ali@example.com,Delivered,"[{""quantity"": 1, ""product_name"": ""Sony PlayStation 5""}]",2699,2025-11-20,,Riyadh,Credit Card
+ORD-1002,fatima.s@example.com,Shipped,"[{""quantity"": 1, ""product_name"": ""Dyson Airwrap""}]",2499,2025-12-05,,Jeddah,Apple Pay
+ORD-1003,omar.k@example.com,Delayed,"[{""quantity"": 1, ""product_name"": ""Samsung Galaxy S24 Ultra""}, {""quantity"": 1, ""product_name"": ""Anker Power Bank""}]",5698,2025-12-03,,Dammam,COD
+ORD-1004,layla.h@example.com,Processing,"[{""quantity"": 2, ""product_name"": ""Luxury Abaya""}]",900,2025-12-06,,Riyadh,Credit Card
+ORD-1005,khalid.m@example.com,Delivered,"[{""quantity"": 3, ""product_name"": ""Saudi Thobe""}]",840,2025-11-25,,Mecca,COD
+ORD-1006,noor.a@example.com,Delayed,"[{""quantity"": 1, ""product_name"": ""Nike Air Jordan 1""}]",899,2025-12-02,,Riyadh,COD
+ORD-1007,yousef.z@example.com,Shipped,"[{""quantity"": 1, ""product_name"": ""Apple Watch Ultra""}]",3100,2025-12-05,,Jeddah,Mada
+ORD-1008,sara.b@example.com,Processing,"[{""quantity"": 1, ""product_name"": ""Gucci Bag""}]",4500,2025-12-07,,Dammam,Credit Card
+ORD-1009,ibrahim.t@example.com,Delayed,"[{""quantity"": 1, ""product_name"": ""LG UltraWide Monitor""}, {""quantity"": 1, ""product_name"": ""Mechanical Keyboard""}]",2200,2025-12-01,,Riyadh,COD
+ORD-1010,mona.e@example.com,Delivered,"[{""quantity"": 1, ""product_name"": ""Ray-Ban Sunglasses""}]",650,2025-11-28,,Jeddah,Tamara (BNPL)
