@@ -36,6 +36,30 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     enabled: shouldAnimateText,
   });
 
+  // Helper function to clean and normalize text for markdown rendering
+  const cleanTextForMarkdown = (text: string): string => {
+    if (!text) return text;
+    
+    // Replace literal escape sequences with actual characters
+    let cleaned = text
+      .replace(/\\n/g, "\n")           // \n -> newline
+      .replace(/\\r\\n/g, "\n")         // \r\n -> newline (Windows)
+      .replace(/\\r/g, "\n")            // \r -> newline (Mac)
+      .replace(/\\t/g, " ")            // \t -> space
+      .replace(/\\\\/g, "\\");         // \\ -> \ (unescape backslashes)
+    
+    // Remove excessive whitespace but preserve intentional line breaks
+    cleaned = cleaned.replace(/^[ \t]+/gm, "");     // Remove leading spaces/tabs from each line
+    cleaned = cleaned.replace(/[ \t]+$/gm, "");     // Remove trailing spaces/tabs from each line
+    cleaned = cleaned.replace(/\n{3,}/g, "\n\n");  // Multiple newlines to double
+    
+    // Remove any standalone backslashes that aren't part of markdown (but preserve markdown syntax)
+    // Only remove backslashes that are clearly escape sequences
+    cleaned = cleaned.replace(/\\(?![*_`\[\]()#-])/g, ""); // Remove backslashes not followed by markdown chars
+    
+    return cleaned.trim();
+  };
+
   // Helper function to clean product list from AI message text
   // Removes markdown product lists (e.g., "* **Product** - **Price**") to avoid duplication
   const cleanProductListFromText = (text: string): string => {
@@ -80,18 +104,20 @@ export const UIMapper = ({ message }: UIMapperProps) => {
   ) {
     if (!products || !Array.isArray(products) || products.length === 0) {
       // Fallback to text if data is invalid - with text reveal
+      const normalizedFallbackContent = cleanTextForMarkdown(displayedText);
       return (
         <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm">
-          <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">
-            {displayedText}
-          </p>
+          <div className="markdown-content break-words text-xs sm:text-sm">
+            <ReactMarkdown>{normalizedFallbackContent}</ReactMarkdown>
+          </div>
         </div>
       );
     }
 
     // Clean the AI message to remove product list (since we show it in cards)
     const cleanedContent = cleanProductListFromText(message.content || "");
-    const shouldShowIntroText = cleanedContent && cleanedContent.trim().length > 0;
+    const normalizedContent = cleanTextForMarkdown(cleanedContent);
+    const shouldShowIntroText = normalizedContent && normalizedContent.trim().length > 0;
 
     return (
       <div className="w-full space-y-2 sm:space-y-3 max-w-full">
@@ -99,7 +125,7 @@ export const UIMapper = ({ message }: UIMapperProps) => {
         {shouldShowIntroText && (
           <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
             <div className="markdown-content break-words text-xs sm:text-sm">
-              <ReactMarkdown>{cleanedContent}</ReactMarkdown>
+              <ReactMarkdown>{normalizedContent}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -147,13 +173,14 @@ export const UIMapper = ({ message }: UIMapperProps) => {
     normalizedType.includes("notification")
   ) {
     const orderData = message.data?.[0] || {};
+    const normalizedOrderContent = cleanTextForMarkdown(displayedText);
     return (
       <div className="w-full space-y-2 sm:space-y-3 max-w-full">
         {/* Show AI message if available - with markdown rendering */}
-        {message.content && message.content.trim() && (
+        {normalizedOrderContent && normalizedOrderContent.trim() && (
           <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm w-full max-w-full">
             <div className="markdown-content break-words text-xs sm:text-sm">
-              <ReactMarkdown>{displayedText}</ReactMarkdown>
+              <ReactMarkdown>{normalizedOrderContent}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -172,10 +199,11 @@ export const UIMapper = ({ message }: UIMapperProps) => {
   }
 
   // Default: render as text - with markdown rendering
+  const normalizedTextContent = cleanTextForMarkdown(displayedText);
   return (
     <div className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-muted text-muted-foreground shadow-sm">
       <div className="markdown-content break-words text-xs sm:text-sm">
-        <ReactMarkdown>{displayedText}</ReactMarkdown>
+        <ReactMarkdown>{normalizedTextContent}</ReactMarkdown>
       </div>
     </div>
   );
