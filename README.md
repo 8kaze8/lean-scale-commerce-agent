@@ -33,6 +33,53 @@ Built with a **Multi-Agentic Architecture** using **n8n**, **Google Gemini 2.5 F
 
 ---
 
+## 📚 Reference Data & Documentation
+
+This repository includes essential reference data and documentation files for testing, validation, and system understanding:
+
+### 📁 `/database` Directory
+
+Contains sample data files used for testing and validation:
+
+- **`evaluation_dataset.csv`**: Golden dataset with 10 complex test scenarios for LLM-as-a-Judge evaluation, including:
+
+  - Product search queries (specific, filtered, feature-based)
+  - Policy queries (high-value orders, returns, payments)
+  - Order tracking scenarios (delivered, shipped, delayed)
+  - Multi-language support (Arabic, English, Turkish)
+
+- **`products_rows.csv`**: Sample product catalog with 20 products including:
+
+  - Electronics (iPhone, Samsung, PlayStation, Dyson, etc.)
+  - Fashion items (Abaya, Thobe, Nike, Gucci, etc.)
+  - Product details: ID, name, description, price (SAR), category, image URLs, metadata
+
+- **`orders_rows.csv`**: Sample order data with 10 orders including:
+  - Order IDs (ORD-1001 to ORD-1010)
+  - Order statuses (Delivered, Shipped, Delayed, Processing)
+  - Customer information, items, total amounts, expected delivery dates
+  - Payment methods and customer cities
+
+### 📁 `/documents` Directory
+
+Contains policy and documentation files:
+
+- **`KSA_Comprehensive_Policy_GenericCommerce (1).pdf`**: Complete policy document covering:
+  - Shipping policies (tier-based delivery times, fees)
+  - Return and refund policies
+  - Payment methods (Tamara, Tabby, Mada, COD, etc.)
+  - ID verification requirements for high-value orders
+  - City-tier specific rules (Riyadh, Jeddah, Tier 2, Tier 3)
+
+**Note:** These files are used for:
+
+- **Testing:** Evaluation dataset validates AI response quality
+- **Development:** Sample data helps understand system behavior
+- **Validation:** Policy document ensures accurate RAG retrieval
+- **Documentation:** Reference for understanding business rules and data structures
+
+---
+
 ## 🏗️ Architecture Overview
 
 ### The System Core: Dual-Stream Data Ingestion
